@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TruckManagement.Application.Services;
 using TruckManagement.Infrastructure.Contexts;
+using TruckManagement.Infrastructure.Helpers;
 using TruckManagement.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,7 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddScoped<ITruckRepository, TruckRepository>();
 builder.Services.AddScoped<ITruckService, TruckService>();
+builder.Services.AddSingleton<StatusHelper>();
 
 builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
