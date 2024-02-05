@@ -18,26 +18,33 @@ public interface ITruckRepository
     /// </summary>
     /// <param name="code">Code string.</param>
     /// <returns>Truck <see cref="Truck"/>.</returns>
-    public Task<Truck> GetTruckByCodeAsync(string code);
+    public Task<Truck?> GetTruckByCodeAsync(string code);
+    
+    /// <summary>
+    /// Used to get specific truck domain transfer object by code.
+    /// </summary>
+    /// <param name="code">Code string.</param>
+    /// <returns>Truck DTO <see cref="TruckDto"/>.</returns>
+    public Task<TruckDto?> GetTruckDtoByCodeAsync(string code);
     
     /// <summary>
     /// Used to add truck.
     /// </summary>
     /// <param name="truck">Truck data <see cref="Truck"/>.</param>
     /// <returns>Added truck <see cref="Truck"/>.</returns>
-    public Task<Truck> AddTruckAsync(Truck truck);
+    public Task<Truck?> AddTruckAsync(Truck truck);
     
     /// <summary>
     /// Used to update truck.
     /// </summary>
     /// <param name="truck">Truck data <see cref="Truck"/>.</param>
     /// <returns>Updated truck <see cref="Truck"/>.</returns>
-    public Task<Truck> UpdateTruckAsync(Truck truck);
+    public Task<Truck?> UpdateTruckAsync(Truck truck);
     
     /// <summary>
     /// Used to remove truck.
     /// </summary>
     /// <param name="code">Code string.</param>
     /// <returns>Nothing.</returns>
-    public Task DeleteTruckAsync(string code);
+    public Task<bool> DeleteTruckAsync(string code);
 }

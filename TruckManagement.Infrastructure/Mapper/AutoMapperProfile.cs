@@ -10,5 +10,9 @@ public class AutoMapperProfile : Profile
     {
         CreateMap<TrucksEntity, Truck>();
         CreateMap<Truck, TrucksEntity>();
+        CreateMap<TruckDto, TrucksEntity>();
+        CreateMap<TrucksEntity, TruckDto>();
+        CreateMap<TruckDto, Truck>();
+        CreateMap<Truck, TruckDto>();
     }
 }

@@ -18,21 +18,21 @@ public interface ITruckService
     /// </summary>
     /// <param name="code">Code string.</param>
     /// <returns>Truck <see cref="Truck"/>.</returns>
-    public Task<Truck> GetTruckByCodeAsync(string code);
+    public Task<Truck?> GetTruckByCodeAsync(string code);
     
     /// <summary>
     /// Used to add truck.
     /// </summary>
     /// <param name="truck">Truck data <see cref="Truck"/>.</param>
     /// <returns>Added truck <see cref="Truck"/>.</returns>
-    public Task<Truck> AddTruckAsync(Truck truck);
+    public Task<Truck?> AddTruckAsync(Truck truck);
     
     /// <summary>
     /// Used to update truck.
     /// </summary>
     /// <param name="truck">Truck data <see cref="Truck"/>.</param>
     /// <returns>Updated truck <see cref="Truck"/>.</returns>
-    public Task<Truck> UpdateTruckAsync(Truck truck);
+    public Task<Truck?> UpdateTruckAsync(Truck truck);
     
     /// <summary>
     /// Used to remove truck.
