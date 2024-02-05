@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Net.Http.Headers;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using TruckManagement.Application.Services;
@@ -10,7 +11,10 @@ namespace TruckManagement.Controllers;
 [Route("v1/trucks")]
 public class TruckController : ControllerBase
 {
-
+    private static readonly string SomethingWentWrongMessage = "Something went wrong";
+    private static readonly string TruckNotFoundMessage = "Truck not found";
+    private static readonly string TruckAlreadyExistsMessage = "Truck with this code already exists";
+    
     private readonly ITruckService _truckService;
     
     private readonly ILogger<TruckController> _logger;
@@ -22,51 +26,52 @@ public class TruckController : ControllerBase
     }
 
     /// <summary>
-    /// Get list of trucks registered in the system.
+    /// Gets list of trucks registered in the system.
     /// </summary>
     /// <returns>List of trucks.</returns>
     [HttpGet]
-    // [Produces(MediaTypeNames.Application.Json)]
-    // [ProducesResponseType(typeof(List<Truck>), StatusCodes.Status200OK)]
+    [Produces(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(List<Truck>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get()
     {
-        var ret = await _truckService.GetTrucksAsync();
-        return Ok(ret);
-    }
-    
-    [HttpGet("test")]
-    public IActionResult Test()
-    {
-        return Ok(new { Message = "Hello, world!" });
+        return Ok(await _truckService.GetTrucksAsync());
     }
 
     /// <summary>
-    /// Get truck by code.
+    /// Gets truck by code.
     /// </summary>
     /// <param name="code"></param>
     /// <returns>Truck. <see cref="Truck"/></returns>
     [HttpGet("{code}")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(Truck), StatusCodes.Status200OK)]
-    public async Task<Truck> Get(string code)
+    public async Task<IActionResult> Get(string code)
     {
-        return await _truckService.GetTruckByCodeAsync(code);
+        var response = await _truckService.GetTruckByCodeAsync(code);
+        return response != null?  Ok(response) : NotFound(new { message = TruckNotFoundMessage });
     }
 
     /// <summary>
-    /// Add truck to the system.
+    /// Adds truck to the system.
     /// </summary>
-    /// <remarks>
-    /// Sample request:
-    ///
-    /// </remarks>
     /// <param name="truck">Truck <see cref="Truck"/>.</param>
     /// <returns>Added truck.</returns>
     [HttpPost]
+    [Produces(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(Truck), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Post([Required][FromBody] Truck truck)
     {
-        return Ok(await _truckService.AddTruckAsync(truck));
+        if(CheckIfTruckExists(truck.Code))
+            return BadRequest(new {message = TruckAlreadyExistsMessage});
+        
+        var truckResponse = await _truckService.AddTruckAsync(truck);
+        if(truckResponse == null)
+            return BadRequest(new {message = SomethingWentWrongMessage});
+        return Ok(truckResponse);
     }
 
     /// <summary>
@@ -75,11 +80,19 @@ public class TruckController : ControllerBase
     /// <param name="truck">Truck.</param>
     /// <returns>Updated truck.</returns>
     [HttpPut]
+    [Produces(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(Truck), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Put([FromBody] Truck truck)
     {
-        return Ok(await _truckService.UpdateTruckAsync(truck));
+        if(!CheckIfTruckExists(truck.Code))
+            return NotFound(new {message = TruckNotFoundMessage});
+        
+        var truckResponse = await _truckService.UpdateTruckAsync(truck);
+        if(truckResponse == null)
+            return BadRequest(new {message = SomethingWentWrongMessage});
+        return Ok(truckResponse);
     }
 
     /// <summary>
@@ -91,8 +104,12 @@ public class TruckController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Delete(string code)
     {
-        await _truckService.DeleteTruckAsync(code);
-        return NoContent();
+        var response = await _truckService.DeleteTruckAsync(code);
+        return response? NoContent() : BadRequest(new { message = SomethingWentWrongMessage });
     }
-    
+
+    private bool CheckIfTruckExists(string code)
+    {
+        return _truckService.GetTruckByCodeAsync(code).Result != null;
+    }
 }
