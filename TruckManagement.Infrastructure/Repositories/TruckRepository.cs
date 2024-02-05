@@ -1,6 +1,7 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using TruckManagement.Domain.Enums;
 using TruckManagement.Domain.Models;
 using TruckManagement.Infrastructure.Contexts;
 using TruckManagement.Infrastructure.Entities;
@@ -107,5 +108,37 @@ public class TruckRepository : ITruckRepository
             return true;
         
         return false;
+    }
+
+    /// <inheritdoc />
+    public async Task<List<Truck>> SearchTrucksAsync(string? code, string? name, StatusEnum? status, string? sortColumn, string? sortDirection)
+    {
+        var response = BaseQuery;
+        
+        if(!string.IsNullOrEmpty(code))
+            response = response.Where(x => x.Code == code);
+        
+        if(!string.IsNullOrEmpty(name))
+            response = response.Where(x => x.Name == name);
+        
+        if(status.HasValue)
+            response = response.Where(x => x.Status == status.Value);
+        
+        var listResponse = await response.ToListAsync();
+
+        if (!string.IsNullOrEmpty(sortColumn))
+        {
+            if((!string.IsNullOrEmpty(sortDirection) && sortDirection.ToLower() == "asc" )|| string.IsNullOrEmpty(sortDirection))
+                listResponse = listResponse.OrderBy(t => GetPropertyValue(t, sortColumn)).ToList();
+            else
+                listResponse = listResponse.OrderByDescending(t => GetPropertyValue(t, sortColumn)).ToList();
+        }
+        
+        return _mapper.Map<List<Truck>>(listResponse);
+    }
+    
+    private static object GetPropertyValue(object obj, string propertyName)
+    {
+        return obj.GetType().GetProperty(propertyName)?.GetValue(obj, null);
     }
 }
