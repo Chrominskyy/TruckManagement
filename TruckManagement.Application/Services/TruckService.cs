@@ -2,6 +2,7 @@ using System.Collections;
 using Microsoft.Extensions.Logging;
 using TruckManagement.Domain.Enums;
 using TruckManagement.Domain.Models;
+using TruckManagement.Infrastructure.Helpers;
 using TruckManagement.Infrastructure.Repositories;
 
 namespace TruckManagement.Application.Services;
@@ -13,14 +14,17 @@ public class TruckService : ITruckService
     
     private readonly ILogger<TruckService> _logger;
 
+    private readonly StatusHelper _statusHelper;
+
     /// <summary>
     /// Default constructor for TruckService.
     /// </summary>
     /// <param name="truckRepository"></param>
-    public TruckService(ITruckRepository truckRepository, ILogger<TruckService> logger)
+    public TruckService(ITruckRepository truckRepository, ILogger<TruckService> logger, StatusHelper statusHelper)
     {
         _truckRepository = truckRepository;
         _logger = logger;
+        _statusHelper = statusHelper;
     }
 
     /// <inheritdoc />
@@ -52,6 +56,20 @@ public class TruckService : ITruckService
     public async Task<Truck?> UpdateTruckAsync(Truck truck)
     {
         _logger.LogDebug("UpdateTruckAsync started");
+
+        var existingTruck = await _truckRepository.GetTruckByCodeAsync(truck.Code);
+        var expectedStatus = _statusHelper.MoveToNextStatus(existingTruck.Status);
+        if (truck.Status == StatusEnum.OutOfService)
+            truck.Status = _statusHelper.MoveToOutOfService(truck.Status);
+        
+        if (truck.Status != existingTruck.Status &&
+            existingTruck.Status != StatusEnum.OutOfService &&
+            truck.Status != StatusEnum.OutOfService &&
+            truck.Status != expectedStatus)
+        {
+            _logger.LogError("UpdateTruckAsync status is incorrect, expected: {ExpectedStatus}, actual: {ActualStatus}", expectedStatus, truck.Status);
+            return null;
+        }
         
         var updatedTruck = await _truckRepository.UpdateTruckAsync(truck);
         if(updatedTruck == null)
