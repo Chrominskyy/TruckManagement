@@ -107,7 +107,7 @@ Gets a list of trucks filtered and sorted based on parameters.
 | ---- | ---------- | ----------- | -------- | ------ |
 | code | query | Filter by truck code, e.g., "ABC123". | No | string |
 | name | query | Filter by truck name, e.g., "Truck Name 123". | No | string |
-| status | query | Filter by truck status, using the `StatusEnum` values. | No | [StatusEnum](#StatusEnum) |
+| status | query | Filter by truck status, using the `StatusEnum` values. | No | [StatusEnum](https://github.com/Chrominskyy/TruckManagement/blob/init/TruckManagement.Domain/Enums/StatusEnum.cs) |
 | sortColumn | query | Specify the column to sort by, e.g., "Name". | No | string |
 | sortDirection | query | Specify the sort direction, "ASC" or "DESC". | No | string |
 
