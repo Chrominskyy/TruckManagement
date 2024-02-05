@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using System.Net.Http.Headers;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using TruckManagement.Application.Services;
+using TruckManagement.Domain.Enums;
 using TruckManagement.Domain.Models;
 
 namespace TruckManagement.Controllers;
@@ -106,6 +106,24 @@ public class TruckController : ControllerBase
     {
         var response = await _truckService.DeleteTruckAsync(code);
         return response? NoContent() : BadRequest(new { message = SomethingWentWrongMessage });
+    }
+    
+    /// <summary>
+    /// Gets list of truck filtered and sorted based on parameters.
+    /// </summary>
+    /// <param name="code">Code eg. "ABC123"</param>
+    /// <param name="name">Name eg. "Truck Name 123"</param>
+    /// <param name="status">StatusEnum eg. 3</param>
+    /// <param name="sortColumn">Column that needs to be sorted by eg. "Name"</param>
+    /// <param name="sortDirection">Direction "ASC" or "DESC"</param>
+    /// <returns>List of trucks</returns>
+    [HttpGet("search")]
+    [Produces(MediaTypeNames.Application.Json)]
+    [Consumes(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(List<Truck>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Search([FromQuery] string? code, [FromQuery] string? name, [FromQuery] StatusEnum? status, [FromQuery] string? sortColumn, [FromQuery] string? sortDirection )
+    {
+        return Ok(await _truckService.SearchTrucksAsync(code, name, status, sortColumn, sortDirection));
     }
 
     private bool CheckIfTruckExists(string code)

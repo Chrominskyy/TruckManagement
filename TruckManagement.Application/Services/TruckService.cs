@@ -86,4 +86,13 @@ public class TruckService : ITruckService
         
         return response;
     }
+
+    /// <inheritdoc />
+    public async Task<List<Truck>> SearchTrucksAsync(string? code, string? name, StatusEnum? status, string? sortColumn, string? sortDirection)
+    {
+        _logger.LogDebug("SearchTrucksAsync started");
+        var response = await _truckRepository.SearchTrucksAsync(code, name, status, sortColumn, sortDirection);
+        
+        return response;
+    }
 }
