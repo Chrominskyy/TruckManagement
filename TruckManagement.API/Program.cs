@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Models;
 using TruckManagement.Application.Services;
 using TruckManagement.Infrastructure.Contexts;
 using TruckManagement.Infrastructure.Helpers;
+using TruckManagement.Infrastructure.Mapper;
 using TruckManagement.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,7 +35,7 @@ builder.Configuration.SetBasePath(Directory.GetCurrentDirectory())
 builder.Services.AddDbContext<TruckDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(cfg => { }, typeof(AutoMapperProfile));
 
 builder.Services
     .AddControllers(options => options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true)
